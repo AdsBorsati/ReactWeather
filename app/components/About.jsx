@@ -17,10 +17,10 @@ var About = (props) => {
       <p>Here is some of the tools i used:</p>
       <ul>
         <li>
-          <a href="https://facebook.github.io/react">React</a> - This was the JavaScript framework used.
+          <a target="_blank" href="https://facebook.github.io/react">React</a> - This was the JavaScript framework used.
         </li>
         <li>
-          <a href="http://openweathermap.org">Open Weather Map</a> - I used Open Weather Map to search for weather data by city name.
+          <a target="_blank" href="http://openweathermap.org">Open Weather Map</a> - I used Open Weather Map to search for weather data by city name.
         </li>
       </ul>
     </div>
