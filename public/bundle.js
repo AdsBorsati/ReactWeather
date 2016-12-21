@@ -106,12 +106,15 @@
 
 	var Main = __webpack_require__(223);
 	var Weather = __webpack_require__(225);
-	var About = __webpack_require__(254);
-	var Examples = __webpack_require__(255);
+	var About = __webpack_require__(255);
+	var Examples = __webpack_require__(256);
 
 	// Load foundation
-	__webpack_require__(256);
+	__webpack_require__(257);
 	$(document).foundation();
+
+	// Loading Our CSS
+	__webpack_require__(261);
 
 	ReactDOM.render(React.createElement(
 	  Router,
@@ -24965,7 +24968,13 @@
 	  onSearch: function onSearch(e) {
 	    e.preventDefault();
 
-	    alert('search');
+	    var location = this.refs.search.value;
+	    var locationEncoded = encodeURIComponent(location);
+
+	    if (locationEncoded && locationEncoded.length > 0) {
+	      this.refs.search.value = '';
+	      window.location.hash = '#/?location=' + locationEncoded;
+	    }
 	  },
 	  render: function render() {
 	    return React.createElement(
@@ -25023,7 +25032,7 @@
 	            React.createElement(
 	              'li',
 	              null,
-	              React.createElement('input', { type: 'search', placeholder: 'Search Weather' })
+	              React.createElement('input', { type: 'search', placeholder: 'Search Weather by City', ref: 'search' })
 	            ),
 	            React.createElement(
 	              'li',
@@ -25049,6 +25058,7 @@
 	var WeatherForm = __webpack_require__(226);
 	var WeatherMessage = __webpack_require__(227);
 	var openWeatherMap = __webpack_require__(228);
+	var Modal = __webpack_require__(254);
 
 	var Weather = React.createClass({
 	  displayName: 'Weather',
@@ -25056,31 +25066,45 @@
 	  getInitialState: function getInitialState() {
 	    return {
 	      isLoading: false,
-	      errorMessage: '',
 	      location: '',
-	      temp: 0
+	      temp: 0,
+	      errorMessage: undefined
 	    };
 	  },
 	  handleSearch: function handleSearch(location) {
 	    var that = this;
-
 	    this.setState({
-	      isLoading: true
+	      isLoading: true,
+	      errorMessage: undefined,
+	      location: undefined,
+	      temp: undefined
 	    });
-
 	    openWeatherMap.getTemp(location).then(function (temperature) {
 	      that.setState({
 	        location: location,
 	        temp: temperature,
-	        isLoading: false,
-	        errorMessage: ''
+	        isLoading: false
 	      });
 	    }, function (errorMessage) {
 	      that.setState({
 	        isLoading: false,
-	        errorMessage: 'Houve um erro ao buscar a Temperatura.'
+	        errorMessage: errorMessage.message
 	      });
 	    });
+	  },
+	  componentDidMount: function componentDidMount() {
+	    var location = this.props.location.query.location;
+	    if (location && location.length > 0) {
+	      this.handleSearch(location);
+	      window.location.hash = '#/';
+	    }
+	  },
+	  componentWillReceiveProps: function componentWillReceiveProps(props) {
+	    var location = props.location.query.location;
+	    if (location && location.length > 0) {
+	      this.handleSearch(location);
+	      window.location.hash = '#/';
+	    }
 	  },
 	  render: function render() {
 	    var _state = this.state,
@@ -25098,23 +25122,18 @@
 	          { className: 'text-center' },
 	          'Fetching Weather...'
 	        );
-	      } else if (errorMessage) {
-	        return React.createElement(
-	          'h3',
-	          null,
-	          errorMessage
-	        );
+	      } else if (typeof errorMessage === 'string') {
+	        return React.createElement(Modal, { message: errorMessage });
 	      } else if (temp && location) {
 	        return React.createElement(WeatherMessage, { location: location, temp: temp });
 	      }
 	    }
-
 	    return React.createElement(
 	      'div',
 	      null,
 	      React.createElement(
 	        'h1',
-	        { className: 'text-center' },
+	        { className: 'text-center page-title' },
 	        'Weather App'
 	      ),
 	      React.createElement(WeatherForm, { onSearch: this.handleSearch }),
@@ -25156,7 +25175,7 @@
 	        React.createElement(
 	          'div',
 	          null,
-	          React.createElement('input', { placeholder: 'Enter City Name', type: 'text', ref: 'location' })
+	          React.createElement('input', { placeholder: 'Search Weather by City', type: 'search', ref: 'location' })
 	        ),
 	        React.createElement(
 	          'button',
@@ -26739,6 +26758,64 @@
 /* 254 */
 /***/ function(module, exports, __webpack_require__) {
 
+	/* WEBPACK VAR INJECTION */(function($) {'use strict';
+
+	var React = __webpack_require__(8);
+
+	var Modal = React.createClass({
+	  displayName: 'Modal',
+
+	  propTypes: {
+	    title: React.PropTypes.string,
+	    message: React.PropTypes.string.isRequired
+	  },
+	  getDefaultProps: function getDefaultProps() {
+	    return {
+	      title: 'Woops!'
+	    };
+	  },
+	  componentDidMount: function componentDidMount() {
+	    var modal = new Foundation.Reveal($("#modal"));
+	    modal.open();
+	  },
+	  render: function render() {
+	    var _props = this.props,
+	        title = _props.title,
+	        message = _props.message;
+
+	    return React.createElement(
+	      'div',
+	      { id: 'modal', className: 'reveal tiny text-center', 'data-reveal': '' },
+	      React.createElement(
+	        'h4',
+	        null,
+	        title
+	      ),
+	      React.createElement(
+	        'p',
+	        { className: 'lead' },
+	        message
+	      ),
+	      React.createElement(
+	        'p',
+	        null,
+	        React.createElement(
+	          'button',
+	          { className: 'button hollow', 'data-close': '', type: 'button' },
+	          'Okay'
+	        )
+	      )
+	    );
+	  }
+	});
+
+	module.exports = Modal;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
+
+/***/ },
+/* 255 */
+/***/ function(module, exports, __webpack_require__) {
+
 	"use strict";
 
 	var React = __webpack_require__(8);
@@ -26758,7 +26835,7 @@
 	    null,
 	    React.createElement(
 	      "h1",
-	      { className: "text-center" },
+	      { className: "text-center page-title" },
 	      "About"
 	    ),
 	    React.createElement(
@@ -26789,7 +26866,7 @@
 	        null,
 	        React.createElement(
 	          "a",
-	          { href: "http:openweathermap.org" },
+	          { href: "http://openweathermap.org" },
 	          "Open Weather Map"
 	        ),
 	        " - I used Open Weather Map to search for weather data by city name."
@@ -26801,7 +26878,7 @@
 	module.exports = About;
 
 /***/ },
-/* 255 */
+/* 256 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -26828,7 +26905,7 @@
 	    null,
 	    React.createElement(
 	      'h1',
-	      { className: 'text-center' },
+	      { className: 'text-center page-title' },
 	      'Examples'
 	    ),
 	    React.createElement(
@@ -26864,16 +26941,16 @@
 	module.exports = Examples;
 
 /***/ },
-/* 256 */
+/* 257 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(257);
+	var content = __webpack_require__(258);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(259)(content, {});
+	var update = __webpack_require__(260)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -26890,10 +26967,10 @@
 	}
 
 /***/ },
-/* 257 */
+/* 258 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(258)();
+	exports = module.exports = __webpack_require__(259)();
 	// imports
 
 
@@ -26904,7 +26981,7 @@
 
 
 /***/ },
-/* 258 */
+/* 259 */
 /***/ function(module, exports) {
 
 	/*
@@ -26960,7 +27037,7 @@
 
 
 /***/ },
-/* 259 */
+/* 260 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -27211,6 +27288,46 @@
 		if(oldSrc)
 			URL.revokeObjectURL(oldSrc);
 	}
+
+
+/***/ },
+/* 261 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+
+	// load the styles
+	var content = __webpack_require__(262);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(260)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./app.scss", function() {
+				var newContent = require("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./app.scss");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 262 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(259)();
+	// imports
+
+
+	// module
+	exports.push([module.id, ".page-title {\n  color: #555;\n  margin-top: 40px;\n  margin-bottom: 40px; }\n\ninput[type=search] {\n  box-shadow: none; }\n", ""]);
+
+	// exports
 
 
 /***/ }
